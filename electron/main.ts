@@ -5,21 +5,73 @@ import * as path from 'path'
 
 let mainWindow: BrowserWindow | null = null
 let runningProcess: ChildProcess | null = null
-let autoSaveEnabled = false
+
+// 配置文件系统
+interface AppConfig {
+  isDarkMode: boolean
+  autoSaveEnabled: boolean
+  windowBounds?: { width: number; height: number; x?: number; y?: number }
+}
+
+const defaultConfig: AppConfig = {
+  isDarkMode: false,
+  autoSaveEnabled: false
+}
+
+function getConfigPath(): string {
+  return path.join(app.getPath('userData'), 'config.json')
+}
+
+function loadConfig(): AppConfig {
+  try {
+    const configPath = getConfigPath()
+    if (fs.existsSync(configPath)) {
+      const data = fs.readFileSync(configPath, 'utf-8')
+      return { ...defaultConfig, ...JSON.parse(data) }
+    }
+  } catch (error) {
+    console.error('Failed to load config:', error)
+  }
+  return { ...defaultConfig }
+}
+
+function saveConfig(config: AppConfig): void {
+  try {
+    const configPath = getConfigPath()
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8')
+  } catch (error) {
+    console.error('Failed to save config:', error)
+  }
+}
+
+let appConfig = loadConfig()
 
 function createWindow() {
+  const bounds = appConfig.windowBounds || { width: 1400, height: 900 }
+  
   mainWindow = new BrowserWindow({
-    width: 1400,
-    height: 900,
+    width: bounds.width,
+    height: bounds.height,
+    x: bounds.x,
+    y: bounds.y,
     minWidth: 800,
     minHeight: 600,
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 15, y: 15 },
-    backgroundColor: '#FFFFFF',
+    backgroundColor: appConfig.isDarkMode ? '#1E1E1E' : '#FFFFFF',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false
+    }
+  })
+
+  // 保存窗口位置和大小
+  mainWindow.on('close', () => {
+    if (mainWindow) {
+      const bounds = mainWindow.getBounds()
+      appConfig.windowBounds = bounds
+      saveConfig(appConfig)
     }
   })
 
@@ -69,10 +121,11 @@ function createMenu() {
           id: 'auto-save',
           label: 'Auto Save',
           type: 'checkbox',
-          checked: autoSaveEnabled,
+          checked: appConfig.autoSaveEnabled,
           click: (menuItem) => {
-            autoSaveEnabled = menuItem.checked
-            mainWindow?.webContents.send('menu-auto-save-toggle', autoSaveEnabled)
+            appConfig.autoSaveEnabled = menuItem.checked
+            saveConfig(appConfig)
+            mainWindow?.webContents.send('menu-auto-save-toggle', appConfig.autoSaveEnabled)
           }
         },
         { type: 'separator' },
@@ -201,6 +254,23 @@ ipcMain.handle('save-to-desktop', async (_, content: string) => {
   const filepath = path.join(desktopPath, 'NONAME.c')
   fs.writeFileSync(filepath, content, 'utf-8')
   return filepath
+})
+
+// 配置文件操作
+ipcMain.handle('get-config', () => {
+  return appConfig
+})
+
+ipcMain.handle('set-config', (_, key: keyof AppConfig, value: unknown) => {
+  (appConfig as Record<string, unknown>)[key] = value
+  saveConfig(appConfig)
+  return appConfig
+})
+
+ipcMain.handle('set-dark-mode', (_, isDarkMode: boolean) => {
+  appConfig.isDarkMode = isDarkMode
+  saveConfig(appConfig)
+  return appConfig
 })
 
 

@@ -38,10 +38,15 @@ function App() {
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const [showThemeTransition, setShowThemeTransition] = useState(false)
 
-  const handleToggleDarkMode = useCallback(() => {
+  const handleToggleDarkMode = useCallback(async () => {
     setShowThemeTransition(true)
     toggleDarkMode()
-  }, [toggleDarkMode])
+    // 保存到配置文件
+    if (window.electronAPI) {
+      const newDarkMode = !isDarkMode
+      await window.electronAPI.setDarkMode(newDarkMode)
+    }
+  }, [toggleDarkMode, isDarkMode])
 
   const handleThemeAnimationEnd = useCallback(() => {
     setShowThemeTransition(false)
@@ -255,12 +260,27 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleNewFile, handleOpenFile, handleSaveFile, handleRun, handleStop, isRunning, isCompiling])
 
-  // Create initial tab if none exist (only once on mount)
+  // Load config and create initial tab on mount
   useEffect(() => {
-    const currentTabs = useEditorStore.getState().tabs
-    if (currentTabs.length === 0) {
-      addTab({})
+    const initApp = async () => {
+      // 加载配置
+      if (window.electronAPI) {
+        const config = await window.electronAPI.getConfig()
+        // 应用暗色模式
+        if (config.isDarkMode !== isDarkMode) {
+          toggleDarkMode()
+        }
+        // 应用自动保存设置
+        setAutoSaveEnabled(config.autoSaveEnabled)
+      }
+      
+      // 创建初始标签页
+      const currentTabs = useEditorStore.getState().tabs
+      if (currentTabs.length === 0) {
+        addTab({})
+      }
     }
+    initApp()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

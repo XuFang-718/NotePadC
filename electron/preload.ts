@@ -15,6 +15,12 @@ export interface CompileResult {
   }>
 }
 
+export interface AppConfig {
+  isDarkMode: boolean
+  autoSaveEnabled: boolean
+  windowBounds?: { width: number; height: number; x?: number; y?: number }
+}
+
 contextBridge.exposeInMainWorld('electronAPI', {
   // File operations
   openFileDialog: (): Promise<FileResult | null> => 
@@ -27,6 +33,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('read-file', filepath),
   saveToDesktop: (content: string): Promise<string> =>
     ipcRenderer.invoke('save-to-desktop', content),
+  
+  // Config operations
+  getConfig: (): Promise<AppConfig> =>
+    ipcRenderer.invoke('get-config'),
+  setConfig: (key: string, value: unknown): Promise<AppConfig> =>
+    ipcRenderer.invoke('set-config', key, value),
+  setDarkMode: (isDarkMode: boolean): Promise<AppConfig> =>
+    ipcRenderer.invoke('set-dark-mode', isDarkMode),
   
   // Compiler operations
   compile: (filepath: string): Promise<CompileResult> => 
