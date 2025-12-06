@@ -1,0 +1,168 @@
+.toolbar {
+  height: 52px;
+  min-height: 52px;
+  background: linear-gradient(180deg, #FAFAFA 0%, #F5F5F7 100%);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  -webkit-app-region: drag;
+  user-select: none;
+  transition: background 0.3s ease;
+}
+
+[data-theme="dark"] .toolbar {
+  background: linear-gradient(180deg, #2C2C2E 0%, #1C1C1E 100%);
+}
+
+.toolbar-drag-region {
+  width: 70px;
+  height: 100%;
+  -webkit-app-region: drag;
+}
+
+.toolbar-left,
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  -webkit-app-region: no-drag;
+}
+
+.toolbar-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.app-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.app-subtitle {
+  font-size: 10px;
+  color: var(--color-primary);
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: rgba(0, 122, 255, 0.1);
+  border-radius: 4px;
+}
+
+.toolbar-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  -webkit-app-region: no-drag;
+}
+
+.toolbar-btn:hover:not(:disabled) {
+  background: var(--color-surface);
+  border-color: #D1D1D6;
+}
+
+.toolbar-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toolbar-btn svg {
+  flex-shrink: 0;
+}
+
+.toolbar-btn-run {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.toolbar-btn-run:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.toolbar-btn-stop {
+  background: var(--color-error);
+  border-color: var(--color-error);
+  color: white;
+}
+
+.toolbar-btn-stop:hover:not(:disabled) {
+  background: #E62E24;
+  border-color: #E62E24;
+}
+
+/* 主题切换按钮 */
+.theme-toggle {
+  padding: 8px;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-icon-wrapper {
+  position: relative;
+  width: 18px;
+  height: 18px;
+}
+
+.sun-icon,
+.moon-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 亮色模式 - 显示太阳 */
+.theme-toggle.light .sun-icon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.theme-toggle.light .moon-icon {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.5);
+}
+
+/* 暗色模式 - 显示月亮 */
+.theme-toggle.dark .sun-icon {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.5);
+}
+
+.theme-toggle.dark .moon-icon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.theme-toggle:hover {
+  background: var(--color-surface);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}

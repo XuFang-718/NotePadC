@@ -1,0 +1,21 @@
+.code-editor {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.code-editor .monaco-editor {
+  padding-top: 0;
+}
+
+.code-editor .monaco-editor .margin {
+  background-color: var(--color-surface) !important;
+}
+
+.code-editor .monaco-editor .line-numbers {
+  color: var(--color-text-secondary) !important;
+}
+
+.code-editor .monaco-editor .current-line ~ .line-numbers {
+  color: var(--color-primary) !important;
+}

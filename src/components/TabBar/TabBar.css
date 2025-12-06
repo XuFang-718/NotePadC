@@ -1,0 +1,125 @@
+.tab-bar {
+  height: 36px;
+  min-height: 36px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: flex-end;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.tab-bar-empty {
+  background: var(--color-surface);
+}
+
+.tab-bar::-webkit-scrollbar {
+  height: 0;
+}
+
+.tab-list {
+  display: flex;
+  height: 100%;
+  align-items: flex-end;
+  padding-left: 8px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  margin-right: 2px;
+}
+
+.tab:hover {
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--color-text);
+}
+
+.tab-active {
+  background: var(--color-background);
+  border-color: var(--color-border);
+  color: var(--color-text);
+  z-index: 1;
+}
+
+.tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--color-background);
+}
+
+.tab-icon {
+  display: flex;
+  align-items: center;
+  color: var(--color-primary);
+  opacity: 0.7;
+}
+
+.tab-active .tab-icon {
+  opacity: 1;
+}
+
+.tab-name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab-dirty {
+  color: var(--color-primary);
+  font-size: 8px;
+  margin-right: 2px;
+}
+
+.tab-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  opacity: 0;
+  transition: all var(--transition-fast);
+}
+
+.tab:hover .tab-close {
+  opacity: 1;
+}
+
+.tab-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--color-text);
+}
+
+.tab-active .tab-close {
+  opacity: 0.5;
+}
+
+.tab-active:hover .tab-close {
+  opacity: 1;
+}
