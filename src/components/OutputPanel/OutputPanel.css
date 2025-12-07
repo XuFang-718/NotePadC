@@ -45,7 +45,7 @@
 .output-content {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: 8px 12px;
   font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace;
   font-size: 12px;
   line-height: 1.6;

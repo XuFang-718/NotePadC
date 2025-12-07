@@ -64,43 +64,71 @@ let keywordTrie: Trie | null = null
 let functionTrie: Trie | null = null
 let headerTrie: Trie | null = null
 
-// C89 关键字
-const C_KEYWORDS = [
-  'auto', 'break', 'case', 'char', 'const', 'continue', 'default', 'do',
-  'double', 'else', 'enum', 'extern', 'float', 'for', 'goto', 'if',
-  'int', 'long', 'register', 'return', 'short', 'signed', 'sizeof', 'static',
-  'struct', 'switch', 'typedef', 'union', 'unsigned', 'void', 'volatile', 'while'
+// C89 关键字 - 带括号的控制结构
+const C_KEYWORDS: Array<{ name: string; snippet: string }> = [
+  { name: 'auto', snippet: 'auto' },
+  { name: 'break', snippet: 'break' },
+  { name: 'case', snippet: 'case' },
+  { name: 'char', snippet: 'char' },
+  { name: 'const', snippet: 'const' },
+  { name: 'continue', snippet: 'continue' },
+  { name: 'default', snippet: 'default' },
+  { name: 'do', snippet: 'do {\n\t$0\n} while ($1);' },
+  { name: 'double', snippet: 'double' },
+  { name: 'else', snippet: 'else' },
+  { name: 'enum', snippet: 'enum' },
+  { name: 'extern', snippet: 'extern' },
+  { name: 'float', snippet: 'float' },
+  { name: 'for', snippet: 'for ($1) {\n\t$0\n}' },
+  { name: 'goto', snippet: 'goto' },
+  { name: 'if', snippet: 'if ($1) {\n\t$0\n}' },
+  { name: 'int', snippet: 'int' },
+  { name: 'long', snippet: 'long' },
+  { name: 'register', snippet: 'register' },
+  { name: 'return', snippet: 'return' },
+  { name: 'short', snippet: 'short' },
+  { name: 'signed', snippet: 'signed' },
+  { name: 'sizeof', snippet: 'sizeof($0)' },
+  { name: 'static', snippet: 'static' },
+  { name: 'struct', snippet: 'struct' },
+  { name: 'switch', snippet: 'switch ($1) {\n\t$0\n}' },
+  { name: 'typedef', snippet: 'typedef' },
+  { name: 'union', snippet: 'union' },
+  { name: 'unsigned', snippet: 'unsigned' },
+  { name: 'void', snippet: 'void' },
+  { name: 'volatile', snippet: 'volatile' },
+  { name: 'while', snippet: 'while ($1) {\n\t$0\n}' }
 ]
 
-// 常用函数（扩展）
+// 常用函数 - 带括号，光标在括号内
 const COMMON_FUNCTIONS: Array<{ name: string; detail: string; snippet: string }> = [
-  { name: 'printf', detail: 'Print formatted output', snippet: 'printf("$1\\n"$2);$0' },
-  { name: 'scanf', detail: 'Read formatted input', snippet: 'scanf("$1", $2);$0' },
-  { name: 'main', detail: 'Main function', snippet: 'int main() {\n\t$0\n\treturn 0;\n}' },
-  { name: 'malloc', detail: 'Allocate memory', snippet: 'malloc($1 * sizeof($2))$0' },
-  { name: 'free', detail: 'Free memory', snippet: 'free($1);$0' },
-  { name: 'strlen', detail: 'String length', snippet: 'strlen($1)$0' },
-  { name: 'strcpy', detail: 'Copy string', snippet: 'strcpy($1, $2);$0' },
-  { name: 'strcmp', detail: 'Compare strings', snippet: 'strcmp($1, $2)$0' },
-  { name: 'strcat', detail: 'Concatenate strings', snippet: 'strcat($1, $2);$0' },
-  { name: 'memset', detail: 'Fill memory', snippet: 'memset($1, $2, sizeof($1));$0' },
-  { name: 'memcpy', detail: 'Copy memory', snippet: 'memcpy($1, $2, $3);$0' },
-  { name: 'fopen', detail: 'Open file', snippet: 'fopen("$1", "$2")$0' },
-  { name: 'fclose', detail: 'Close file', snippet: 'fclose($1);$0' },
-  { name: 'fprintf', detail: 'Print to file', snippet: 'fprintf($1, "$2\\n"$3);$0' },
-  { name: 'fscanf', detail: 'Read from file', snippet: 'fscanf($1, "$2", $3);$0' },
-  { name: 'getchar', detail: 'Get character', snippet: 'getchar()$0' },
-  { name: 'putchar', detail: 'Put character', snippet: 'putchar($1);$0' },
-  { name: 'gets', detail: 'Get string (deprecated)', snippet: 'gets($1);$0' },
-  { name: 'puts', detail: 'Put string', snippet: 'puts($1);$0' },
-  { name: 'atoi', detail: 'String to int', snippet: 'atoi($1)$0' },
-  { name: 'atof', detail: 'String to float', snippet: 'atof($1)$0' },
-  { name: 'abs', detail: 'Absolute value', snippet: 'abs($1)$0' },
-  { name: 'sqrt', detail: 'Square root', snippet: 'sqrt($1)$0' },
-  { name: 'pow', detail: 'Power', snippet: 'pow($1, $2)$0' },
-  { name: 'rand', detail: 'Random number', snippet: 'rand()$0' },
-  { name: 'srand', detail: 'Seed random', snippet: 'srand($1);$0' },
-  { name: 'exit', detail: 'Exit program', snippet: 'exit($1);$0' }
+  { name: 'printf', detail: 'Print formatted output', snippet: 'printf($0)' },
+  { name: 'scanf', detail: 'Read formatted input', snippet: 'scanf($0)' },
+  { name: 'main', detail: 'Main function', snippet: 'main() {\n\t$0\n}' },
+  { name: 'malloc', detail: 'Allocate memory', snippet: 'malloc($0)' },
+  { name: 'free', detail: 'Free memory', snippet: 'free($0)' },
+  { name: 'strlen', detail: 'String length', snippet: 'strlen($0)' },
+  { name: 'strcpy', detail: 'Copy string', snippet: 'strcpy($0)' },
+  { name: 'strcmp', detail: 'Compare strings', snippet: 'strcmp($0)' },
+  { name: 'strcat', detail: 'Concatenate strings', snippet: 'strcat($0)' },
+  { name: 'memset', detail: 'Fill memory', snippet: 'memset($0)' },
+  { name: 'memcpy', detail: 'Copy memory', snippet: 'memcpy($0)' },
+  { name: 'fopen', detail: 'Open file', snippet: 'fopen($0)' },
+  { name: 'fclose', detail: 'Close file', snippet: 'fclose($0)' },
+  { name: 'fprintf', detail: 'Print to file', snippet: 'fprintf($0)' },
+  { name: 'fscanf', detail: 'Read from file', snippet: 'fscanf($0)' },
+  { name: 'getchar', detail: 'Get character', snippet: 'getchar()' },
+  { name: 'putchar', detail: 'Put character', snippet: 'putchar($0)' },
+  { name: 'gets', detail: 'Get string (deprecated)', snippet: 'gets($0)' },
+  { name: 'puts', detail: 'Put string', snippet: 'puts($0)' },
+  { name: 'atoi', detail: 'String to int', snippet: 'atoi($0)' },
+  { name: 'atof', detail: 'String to float', snippet: 'atof($0)' },
+  { name: 'abs', detail: 'Absolute value', snippet: 'abs($0)' },
+  { name: 'sqrt', detail: 'Square root', snippet: 'sqrt($0)' },
+  { name: 'pow', detail: 'Power', snippet: 'pow($0)' },
+  { name: 'rand', detail: 'Random number', snippet: 'rand()' },
+  { name: 'srand', detail: 'Seed random', snippet: 'srand($0)' },
+  { name: 'exit', detail: 'Exit program', snippet: 'exit($0)' }
 ]
 
 // 常用头文件
@@ -119,10 +147,10 @@ function initTries(): void {
   
   // 插入关键字
   for (const kw of C_KEYWORDS) {
-    keywordTrie.insert(kw, { label: kw, kind: 'keyword', insertText: kw })
+    keywordTrie.insert(kw.name, { label: kw.name, kind: 'keyword', insertText: kw.snippet })
   }
   
-  // 插入函数
+  // 插入函数（带括号）
   for (const fn of COMMON_FUNCTIONS) {
     functionTrie.insert(fn.name, {
       label: fn.name,
@@ -221,6 +249,7 @@ export function registerCCompletions(monaco: typeof import('monaco-editor')) {
             label: kw.label,
             kind: monaco.languages.CompletionItemKind.Keyword,
             insertText: kw.insertText,
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
             sortText: `0${i.toString().padStart(3, '0')}`,
             range
           })),

@@ -1,10 +1,11 @@
-import { useRef, useEffect, useCallback, memo } from 'react'
+import { useRef, useEffect, useCallback, memo, useState } from 'react'
 import Editor, { OnMount, OnChange, loader } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import type Monaco from 'monaco-editor'
 import { blueWhiteTheme, darkTheme, THEME_NAME, DARK_THEME_NAME } from './monacoTheme'
 import { registerCCompletions } from './cCompletions'
 import { useEditorStore } from '../../store/editorStore'
+import { SearchBox } from './SearchBox'
 import './CodeEditor.css'
 
 // 预加载 Monaco 编辑器 - 提前初始化
@@ -25,6 +26,7 @@ interface CodeEditorProps {
 export const CodeEditor: React.FC<CodeEditorProps> = memo(({ value, onChange }) => {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
   const isDarkMode = useEditorStore((state) => state.isDarkMode)
+  const [showSearch, setShowSearch] = useState(false)
   // 使用 ref 存储最新的 value，避免闪烁
   const valueRef = useRef(value)
   valueRef.current = value
@@ -55,6 +57,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = memo(({ value, onChange }) 
       })
     }
     
+    // 添加 Cmd+F 快捷键打开搜索框
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF, () => {
+      setShowSearch(true)
+    })
+    
     // Focus editor
     editor.focus()
   }, [isDarkMode])
@@ -79,7 +86,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = memo(({ value, onChange }) 
         value={value}
         onChange={handleChange}
         onMount={handleEditorMount}
-        theme={THEME_NAME}
+        theme={isDarkMode ? DARK_THEME_NAME : THEME_NAME}
         loading={<div className="editor-loading">Loading editor...</div>}
         options={{
           fontSize: 14,
@@ -125,6 +132,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = memo(({ value, onChange }) 
           // @ts-expect-error Monaco types mismatch
           lightbulb: { enabled: false },
           hover: { delay: 300 },
+          // 禁用内置搜索框
+          find: {
+            addExtraSpaceOnTop: false,
+            autoFindInSelection: 'never',
+            seedSearchStringFromSelection: 'never'
+          },
           // 滚动性能
           fastScrollSensitivity: 5,
           mouseWheelScrollSensitivity: 1,
@@ -132,6 +145,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = memo(({ value, onChange }) 
           fixedOverflowWidgets: true
         }}
       />
+      {showSearch && (
+        <SearchBox
+          editor={editorRef.current}
+          onClose={() => setShowSearch(false)}
+        />
+      )}
     </div>
   )
 }, (prevProps, nextProps) => {

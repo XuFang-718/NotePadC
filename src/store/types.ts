@@ -44,6 +44,7 @@ export interface EditorState {
   // UI Actions
   setSplitRatio: (ratio: number) => void
   toggleDarkMode: () => void
+  setDarkMode: (isDarkMode: boolean) => void
   
   // Helpers
   getActiveTab: () => Tab | null

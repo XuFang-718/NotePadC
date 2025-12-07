@@ -30,6 +30,7 @@ function App() {
     setRunning,
     setSplitRatio,
     toggleDarkMode,
+    setDarkMode,
     getActiveTab
   } = useEditorStore()
 
@@ -37,6 +38,7 @@ function App() {
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(false)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const [showThemeTransition, setShowThemeTransition] = useState(false)
+  const [isConfigLoaded, setIsConfigLoaded] = useState(false)
 
   const handleToggleDarkMode = useCallback(async () => {
     setShowThemeTransition(true)
@@ -104,15 +106,11 @@ function App() {
     
     clearOutput()
     setCompiling(true)
-    appendOutput(createInfoLine('Compiling...'))
     
     try {
       const result = await window.electronAPI.compile(filepath)
       
       if (result.success && result.executablePath) {
-        appendOutput(createInfoLine('Compilation successful!'))
-        appendOutput(createInfoLine('Running program...'))
-        appendOutput(createInfoLine('─'.repeat(40)))
         setCompiling(false)
         setRunning(true)
         
@@ -266,13 +264,14 @@ function App() {
       // 加载配置
       if (window.electronAPI) {
         const config = await window.electronAPI.getConfig()
-        // 应用暗色模式
-        if (config.isDarkMode !== isDarkMode) {
-          toggleDarkMode()
-        }
+        // 直接设置暗色模式（不是 toggle）
+        setDarkMode(config.isDarkMode)
         // 应用自动保存设置
         setAutoSaveEnabled(config.autoSaveEnabled)
       }
+      
+      // 标记配置已加载
+      setIsConfigLoaded(true)
       
       // 创建初始标签页
       const currentTabs = useEditorStore.getState().tabs
@@ -325,6 +324,11 @@ function App() {
       document.removeEventListener('drop', handleDrop)
     }
   }, [addTab])
+
+  // 配置加载完成前不渲染主界面，避免主题闪烁
+  if (!isConfigLoaded) {
+    return <div className="app" style={{ backgroundColor: 'var(--bg-primary)' }} />
+  }
 
   return (
     <div className="app">

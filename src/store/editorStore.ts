@@ -186,6 +186,11 @@ export const useEditorStore = create<EditorState>()(
       })
     },
 
+    setDarkMode: (isDarkMode: boolean) => {
+      document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light')
+      set({ isDarkMode })
+    },
+
     // Helpers - 使用缓存优化
     getActiveTab: () => {
       const state = get()
