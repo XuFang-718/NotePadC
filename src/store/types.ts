@@ -4,6 +4,31 @@ export interface Tab {
   filepath: string | null
   content: string
   isDirty: boolean
+  problemId?: string  // 关联的题目ID
+}
+
+// Problem types
+export interface ProblemExample {
+  input: string
+  output: string
+  explanation?: string
+}
+
+export interface Problem {
+  id: string
+  title: string
+  difficulty: 'easy' | 'medium' | 'hard'
+  description: string
+  inputFormat: string
+  outputFormat: string
+  examples: ProblemExample[]
+  constraints?: string[]
+  hints?: string[]
+  template: string
+}
+
+export interface ProblemConfig {
+  problems: Problem[]
 }
 
 export interface OutputLine {
@@ -49,4 +74,19 @@ export interface EditorState {
   // Helpers
   getActiveTab: () => Tab | null
   hasUnsavedChanges: (tabId: string) => boolean
+  
+  // Problem State
+  problems: Problem[]
+  selectedProblemId: string | null
+  userCode: Record<string, string>  // problemId -> code
+  isProblemPanelCollapsed: boolean
+  
+  // Problem Actions
+  setProblems: (problems: Problem[]) => void
+  selectProblem: (problemId: string | null) => void
+  saveUserCode: (problemId: string, code: string) => void
+  getUserCode: (problemId: string) => string | null
+  toggleProblemPanel: () => void
+  setProblemPanelVisible: (visible: boolean) => void
+  getSelectedProblem: () => Problem | null
 }

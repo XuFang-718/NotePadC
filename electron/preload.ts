@@ -21,6 +21,21 @@ export interface AppConfig {
   windowBounds?: { width: number; height: number; x?: number; y?: number }
 }
 
+export interface ProblemConfig {
+  problems: Array<{
+    id: string
+    title: string
+    difficulty: 'easy' | 'medium' | 'hard'
+    description: string
+    inputFormat: string
+    outputFormat: string
+    examples: Array<{ input: string; output: string; explanation?: string }>
+    constraints?: string[]
+    hints?: string[]
+    template: string
+  }>
+}
+
 contextBridge.exposeInMainWorld('electronAPI', {
   // File operations
   openFileDialog: (): Promise<FileResult | null> => 
@@ -42,6 +57,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setDarkMode: (isDarkMode: boolean): Promise<AppConfig> =>
     ipcRenderer.invoke('set-dark-mode', isDarkMode),
   
+  // Problem operations
+  loadProblems: (): Promise<ProblemConfig> =>
+    ipcRenderer.invoke('load-problems'),
+  saveUserCode: (problemId: string, code: string): Promise<string> =>
+    ipcRenderer.invoke('save-user-code', problemId, code),
+  loadUserCode: (problemId: string): Promise<string | null> =>
+    ipcRenderer.invoke('load-user-code', problemId),
+  
   // Compiler operations
   compile: (filepath: string): Promise<CompileResult> => 
     ipcRenderer.invoke('compile', filepath),
@@ -51,6 +74,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.send('send-input', input),
   stopProcess: (): void => 
     ipcRenderer.send('stop-process'),
+  resizePty: (cols: number, rows: number): void =>
+    ipcRenderer.send('resize-pty', cols, rows),
   
   // Event listeners
   onOutput: (callback: (output: string) => void) => {
@@ -58,8 +83,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('process-output', handler)
     return () => ipcRenderer.removeListener('process-output', handler)
   },
-  onProcessExit: (callback: (code: number) => void) => {
-    const handler = (_: unknown, code: number) => callback(code)
+  onProcessExit: (callback: (code: number, stats?: { executionTime: number; cpuTime: number; peakMemory: number }) => void) => {
+    const handler = (_: unknown, code: number, stats?: { executionTime: number; cpuTime: number; peakMemory: number }) => callback(code, stats)
     ipcRenderer.on('process-exit', handler)
     return () => ipcRenderer.removeListener('process-exit', handler)
   },
@@ -94,5 +119,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const handler = (_: unknown, enabled: boolean) => callback(enabled)
     ipcRenderer.on('menu-auto-save-toggle', handler)
     return () => ipcRenderer.removeListener('menu-auto-save-toggle', handler)
+  },
+  onMenuToggleProblems: (callback: (show: boolean) => void) => {
+    const handler = (_: unknown, show: boolean) => callback(show)
+    ipcRenderer.on('menu-toggle-problems', handler)
+    return () => ipcRenderer.removeListener('menu-toggle-problems', handler)
   }
 })

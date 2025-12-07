@@ -6,6 +6,16 @@
   background: var(--color-background);
 }
 
+.main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.main-content > .split-pane {
+  flex: 1;
+}
+
 .editor-container {
   height: 100%;
   width: 100%;

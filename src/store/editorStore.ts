@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { v4 as uuidv4 } from 'uuid'
-import { EditorState, Tab, OutputLine } from './types'
+import { EditorState, Tab, OutputLine, Problem } from './types'
 
 const MIN_SPLIT_RATIO = 0.2
 const MAX_SPLIT_RATIO = 0.8
@@ -44,6 +44,12 @@ export const useEditorStore = create<EditorState>()(
     output: [],
     splitRatio: 0.6,
     isDarkMode: false,
+    
+    // Problem state
+    problems: [],
+    selectedProblemId: null,
+    userCode: {},
+    isProblemPanelCollapsed: false,
 
     // Tab Actions - 使用 Immer-like 不可变更新优化
     addTab: (tabData: Partial<Tab>) => {
@@ -201,6 +207,42 @@ export const useEditorStore = create<EditorState>()(
       const state = get()
       const tab = state.tabs.find(t => t.id === tabId)
       return tab?.isDirty ?? false
+    },
+    
+    // Problem Actions
+    setProblems: (problems: Problem[]) => {
+      set({ problems })
+    },
+    
+    selectProblem: (problemId: string | null) => {
+      const state = get()
+      if (state.selectedProblemId === problemId) return
+      set({ selectedProblemId: problemId })
+    },
+    
+    saveUserCode: (problemId: string, code: string) => {
+      set((state) => ({
+        userCode: { ...state.userCode, [problemId]: code }
+      }))
+    },
+    
+    getUserCode: (problemId: string) => {
+      const state = get()
+      return state.userCode[problemId] || null
+    },
+    
+    toggleProblemPanel: () => {
+      set((state) => ({ isProblemPanelCollapsed: !state.isProblemPanelCollapsed }))
+    },
+    
+    setProblemPanelVisible: (visible: boolean) => {
+      set({ isProblemPanelCollapsed: !visible })
+    },
+    
+    getSelectedProblem: () => {
+      const state = get()
+      if (!state.selectedProblemId) return null
+      return state.problems.find(p => p.id === state.selectedProblemId) || null
     }
   }))
 )

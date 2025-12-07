@@ -9,6 +9,7 @@ interface OutputPanelProps {
   onInput: (input: string) => void
   onClear: () => void
   onLineClick?: (line: number) => void
+  sampleInput?: string
 }
 
 // 单行组件 - 使用 memo 避免不必要的重渲染
@@ -52,7 +53,8 @@ export const OutputPanel: React.FC<OutputPanelProps> = memo(({
   isCompiling,
   onInput,
   onClear,
-  onLineClick
+  onLineClick,
+  sampleInput
 }) => {
   const outputRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -89,6 +91,18 @@ export const OutputPanel: React.FC<OutputPanelProps> = memo(({
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
   }, [])
+
+  const handleUseSampleInput = useCallback(() => {
+    if (sampleInput && isRunning) {
+      // 按行发送示例输入
+      const lines = sampleInput.split('\n')
+      lines.forEach(line => {
+        if (line.trim()) {
+          onInput(line)
+        }
+      })
+    }
+  }, [sampleInput, isRunning, onInput])
 
   // 缓存标题
   const title = useMemo(() => {
@@ -142,6 +156,16 @@ export const OutputPanel: React.FC<OutputPanelProps> = memo(({
             placeholder="Enter input..."
             autoFocus
           />
+          {sampleInput && (
+            <button
+              type="button"
+              className="sample-input-btn"
+              onClick={handleUseSampleInput}
+              title="使用示例输入"
+            >
+              示例
+            </button>
+          )}
         </form>
       )}
     </div>

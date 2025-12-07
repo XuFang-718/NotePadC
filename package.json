@@ -1,20 +1,27 @@
 {
   "name": "notepadc",
-  "version": "1.0.0",
+  "version": "2",
   "description": "NotePadC - A lightweight C code editor with blue-white theme, optimized for macOS",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
+    "build:win": "tsc && vite build && electron-builder --win",
+    "build:mac": "tsc && vite build && electron-builder --mac",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/xterm": "^5.5.0",
+    "node-pty": "^1.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "uuid": "^9.0.1",
+    "xterm": "^5.3.0",
+    "xterm-addon-fit": "^0.8.0",
     "zustand": "^4.4.7"
   },
   "devDependencies": {
@@ -25,6 +32,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "electron": "^28.3.3",
     "electron-builder": "^24.9.1",
+    "electron-rebuild": "^3.2.9",
     "fast-check": "^3.15.0",
     "jsdom": "^23.0.1",
     "typescript": "^5.3.3",
@@ -48,12 +56,31 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["arm64"]
+          "arch": [
+            "arm64"
+          ]
         }
       ],
       "icon": "build/icon.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/source_icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     },
     "dmg": {
       "contents": [

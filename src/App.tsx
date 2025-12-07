@@ -3,10 +3,12 @@ import { useEditorStore, extractFilename } from './store/editorStore'
 import { Toolbar } from './components/Toolbar'
 import { TabBar } from './components/TabBar'
 import { CodeEditor } from './components/CodeEditor'
-import { OutputPanel } from './components/OutputPanel'
+import { Terminal } from './components/Terminal'
 import { SplitPane } from './components/SplitPane'
-import { createInfoLine, createOutputLine, createInputLine, errorsToOutputLines } from './utils/compilerParser'
+import { ProblemPanel } from './components/ProblemPanel'
+import { createInfoLine, errorsToOutputLines } from './utils/compilerParser'
 import { ThemeTransition } from './components/ThemeTransition'
+import { Problem } from './store/types'
 import './styles/App.css'
 
 function App() {
@@ -15,9 +17,11 @@ function App() {
     activeTabId,
     isCompiling,
     isRunning,
-    output,
     splitRatio,
     isDarkMode,
+    problems,
+    selectedProblemId,
+    isProblemPanelCollapsed,
     addTab,
     removeTab,
     setActiveTab,
@@ -31,7 +35,11 @@ function App() {
     setSplitRatio,
     toggleDarkMode,
     setDarkMode,
-    getActiveTab
+    getActiveTab,
+    setProblems,
+    selectProblem,
+    saveUserCode,
+    getUserCode
   } = useEditorStore()
 
   const activeTab = getActiveTab()
@@ -134,16 +142,7 @@ function App() {
       window.electronAPI.stopProcess()
     }
     setRunning(false)
-    appendOutput(createInfoLine('─'.repeat(40)))
-    appendOutput(createInfoLine('Program terminated'))
-  }, [setRunning, appendOutput])
-
-  const handleInput = useCallback((input: string) => {
-    if (window.electronAPI) {
-      window.electronAPI.sendInput(input)
-      appendOutput(createInputLine(input))
-    }
-  }, [appendOutput])
+  }, [setRunning])
 
   const handleTabClose = useCallback((tabId: string) => {
     const tab = tabs.find(t => t.id === tabId)
@@ -153,12 +152,6 @@ function App() {
     }
     removeTab(tabId)
   }, [tabs, removeTab])
-
-  const handleContentChange = useCallback((content: string) => {
-    if (activeTabId) {
-      updateTabContent(activeTabId, content)
-    }
-  }, [activeTabId, updateTabContent])
 
   // Auto save effect
   useEffect(() => {
@@ -190,14 +183,9 @@ function App() {
   useEffect(() => {
     if (!window.electronAPI) return
 
-    const unsubOutput = window.electronAPI.onOutput((data) => {
-      appendOutput(createOutputLine(data))
-    })
-
-    const unsubExit = window.electronAPI.onProcessExit((code) => {
+    // Terminal 组件会处理输出，这里只处理退出状态
+    const unsubExit = window.electronAPI.onProcessExit(() => {
       setRunning(false)
-      appendOutput(createInfoLine('─'.repeat(40)))
-      appendOutput(createInfoLine(`Program exited with code ${code}`))
     })
 
     const unsubNewFile = window.electronAPI.onMenuNewFile(handleNewFile)
@@ -210,7 +198,6 @@ function App() {
     })
 
     return () => {
-      unsubOutput()
       unsubExit()
       unsubNewFile()
       unsubOpenFile()
@@ -219,7 +206,7 @@ function App() {
       unsubStop()
       unsubAutoSave()
     }
-  }, [appendOutput, setRunning, handleNewFile, handleOpenFile, handleSaveFile, handleRun, handleStop])
+  }, [setRunning, handleNewFile, handleOpenFile, handleSaveFile, handleRun, handleStop])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -268,6 +255,12 @@ function App() {
         setDarkMode(config.isDarkMode)
         // 应用自动保存设置
         setAutoSaveEnabled(config.autoSaveEnabled)
+        
+        // 加载题目配置
+        const problemConfig = await window.electronAPI.loadProblems()
+        if (problemConfig?.problems) {
+          setProblems(problemConfig.problems)
+        }
       }
       
       // 标记配置已加载
@@ -325,6 +318,48 @@ function App() {
     }
   }, [addTab])
 
+  // 开始编程 - 加载题目模板或用户代码
+  const handleStartCoding = useCallback(async (problem: Problem) => {
+    // 检查是否有用户保存的代码
+    let code = getUserCode(problem.id)
+    
+    if (!code && window.electronAPI) {
+      // 尝试从文件加载
+      code = await window.electronAPI.loadUserCode(problem.id)
+      if (code) {
+        saveUserCode(problem.id, code)
+      }
+    }
+    
+    // 使用用户代码或模板
+    const content = code || problem.template
+    
+    // 创建新标签页
+    addTab({
+      filename: `${problem.title}.c`,
+      content,
+      isDirty: false,
+      problemId: problem.id
+    })
+  }, [getUserCode, saveUserCode, addTab])
+
+  // 保存用户代码到文件
+  const handleContentChangeWithSave = useCallback((content: string) => {
+    if (activeTabId) {
+      updateTabContent(activeTabId, content)
+      
+      // 如果是题目相关的标签页，保存用户代码
+      const tab = tabs.find(t => t.id === activeTabId)
+      if (tab?.problemId) {
+        saveUserCode(tab.problemId, content)
+        // 异步保存到文件
+        if (window.electronAPI) {
+          window.electronAPI.saveUserCode(tab.problemId, content)
+        }
+      }
+    }
+  }, [activeTabId, updateTabContent, tabs, saveUserCode])
+
   // 配置加载完成前不渲染主界面，避免主题闪烁
   if (!isConfigLoaded) {
     return <div className="app" style={{ backgroundColor: 'var(--bg-primary)' }} />
@@ -355,34 +390,42 @@ function App() {
         onTabSelect={setActiveTab}
         onTabClose={handleTabClose}
       />
-      <SplitPane
-        left={
-          <div className="editor-container">
-            {activeTab ? (
-              <CodeEditor
-                value={activeTab.content}
-                onChange={handleContentChange}
-              />
-            ) : (
-              <div className="editor-empty">
-                <p>No file open</p>
-                <p>Press ⌘N to create a new file</p>
-              </div>
-            )}
-          </div>
-        }
-        right={
-          <OutputPanel
-            output={output}
-            isRunning={isRunning}
-            isCompiling={isCompiling}
-            onInput={handleInput}
-            onClear={clearOutput}
-          />
-        }
-        ratio={splitRatio}
-        onResize={setSplitRatio}
-      />
+      <div className="main-content">
+        <ProblemPanel
+          problems={problems}
+          selectedProblemId={selectedProblemId}
+          onSelectProblem={selectProblem}
+          onStartCoding={handleStartCoding}
+          isCollapsed={isProblemPanelCollapsed}
+        />
+        <SplitPane
+          left={
+            <div className="editor-container">
+              {activeTab ? (
+                <CodeEditor
+                  value={activeTab.content}
+                  onChange={handleContentChangeWithSave}
+                />
+              ) : (
+                <div className="editor-empty">
+                  <p>No file open</p>
+                  <p>Press ⌘N to create a new file</p>
+                </div>
+              )}
+            </div>
+          }
+          right={
+            <Terminal
+              isRunning={isRunning}
+              isCompiling={isCompiling}
+              isDarkMode={isDarkMode}
+              onClear={clearOutput}
+            />
+          }
+          ratio={splitRatio}
+          onResize={setSplitRatio}
+        />
+      </div>
     </div>
   )
 }
