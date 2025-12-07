@@ -174,34 +174,40 @@ export const Terminal = memo(({
 
     unsubExitRef.current = window.electronAPI.onProcessExit((code, stats) => {
       if (xtermRef.current) {
-        xtermRef.current.writeln('')
-        xtermRef.current.writeln('\x1b[90m─'.repeat(40) + '\x1b[0m')
-        
         // 格式化时间显示
         const formatTime = (ms: number) => {
-          if (ms < 1000) return `${ms}ms`
-          return `${(ms / 1000).toFixed(2)}s`
+          if (ms < 1000) return `${ms} ms`
+          return `${(ms / 1000).toFixed(3)} s`
         }
         
+        // 格式化内存显示
+        const formatMemory = (kb: number) => {
+          if (kb < 1024) return `${kb} KB`
+          return `${(kb / 1024).toFixed(2)} MB`
+        }
+        
+        xtermRef.current.writeln('')
+        xtermRef.current.writeln('\x1b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1b[0m')
+        
+        // 判定结果 - OJ 风格
         if (code === 0) {
-          xtermRef.current.writeln('\x1b[32m✓ 程序正常退出\x1b[0m')
+          xtermRef.current.writeln('\x1b[1;32m                 Accepted               \x1b[0m')
         } else if (code === -9) {
-          xtermRef.current.writeln('\x1b[33m⚠ 程序被终止\x1b[0m')
+          xtermRef.current.writeln('\x1b[1;33m            Terminated by User          \x1b[0m')
         } else {
-          xtermRef.current.writeln(`\x1b[31m✗ 程序退出，代码: ${code}\x1b[0m`)
+          xtermRef.current.writeln(`\x1b[1;31m             Runtime Error (${code})           \x1b[0m`)
         }
         
-        // 显示详细统计信息（竞赛风格）
+        xtermRef.current.writeln('\x1b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1b[0m')
+        
+        // 显示统计信息（竞赛风格）
         if (stats) {
-          // 格式化内存显示
-          const formatMemory = (kb: number) => {
-            if (kb < 1024) return `${kb} KB`
-            return `${(kb / 1024).toFixed(2)} MB`
-          }
-          
-          xtermRef.current.writeln('')
-          xtermRef.current.writeln(`\x1b[90m⏱ Time: \x1b[36m${formatTime(stats.cpuTime)}\x1b[90m  │  💾 Memory: \x1b[35m${formatMemory(stats.peakMemory)}\x1b[0m`)
+          const timeStr = formatTime(stats.cpuTime).padStart(12)
+          const memStr = formatMemory(stats.peakMemory).padStart(12)
+          xtermRef.current.writeln(`\x1b[90m  Time:\x1b[0m\x1b[36m${timeStr}\x1b[0m  \x1b[90m│\x1b[0m  \x1b[90mMemory:\x1b[0m\x1b[35m${memStr}\x1b[0m`)
         }
+        
+        xtermRef.current.writeln('')
       }
     })
 
