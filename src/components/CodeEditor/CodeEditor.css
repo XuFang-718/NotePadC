@@ -1,8 +1,10 @@
+/* Pure Black Code Editor */
 .code-editor {
   height: 100%;
   width: 100%;
   overflow: hidden;
   position: relative;
+  background: var(--bg-editor);
 }
 
 .code-editor .monaco-editor {
@@ -11,138 +13,164 @@
   height: 100%;
 }
 
+/* Line numbers gutter */
 .code-editor .monaco-editor .margin {
-  background-color: var(--color-surface) !important;
+  background-color: var(--bg-editor) !important;
 }
 
 .code-editor .monaco-editor .line-numbers {
-  color: var(--color-text-secondary) !important;
+  color: var(--text-secondary) !important;
 }
 
 .code-editor .monaco-editor .current-line ~ .line-numbers {
-  color: var(--color-primary) !important;
+  color: var(--text-primary) !important;
 }
 
-/* 隐藏所有 tooltip */
+/* Current line highlight */
+.code-editor .monaco-editor .view-overlays .current-line {
+  background-color: #222222 !important;
+  border: none !important;
+}
+
+/* Selection */
+.code-editor .monaco-editor .selected-text {
+  background-color: var(--vscode-editor-selectionBackground) !important;
+}
+
+/* Indent guides */
+.code-editor .monaco-editor .lines-content .cigr {
+  background: var(--vscode-editorIndentGuide-background) !important;
+}
+
+.code-editor .monaco-editor .lines-content .cigra {
+  background: var(--vscode-editorIndentGuide-activeBackground) !important;
+}
+
+/* Scrollbar */
+.code-editor .monaco-editor .monaco-scrollable-element > .scrollbar > .slider {
+  background: var(--vscode-scrollbarSlider-background) !important;
+}
+
+.code-editor .monaco-editor .monaco-scrollable-element > .scrollbar > .slider:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground) !important;
+}
+
+.code-editor .monaco-editor .monaco-scrollable-element > .scrollbar > .slider.active {
+  background: var(--vscode-scrollbarSlider-activeBackground) !important;
+}
+
+/* Hide tooltips */
 .code-editor .monaco-editor .monaco-hover {
   display: none !important;
 }
 
-/* 隐藏 Monaco 自带的搜索框 */
+/* Hide Monaco's built-in search widget */
 .code-editor .monaco-editor .find-widget {
   display: none !important;
 }
 
-/* 自定义搜索框样式 */
+/* ==================== CUSTOM SEARCH BOX ==================== */
 .custom-search-box {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 480px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(20px);
-  padding: 16px;
+  top: 10px;
+  right: 20px;
+  width: 400px;
+  background: var(--bg-sidebar);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-medium);
+  padding: 8px;
   z-index: 1000;
-  animation: searchFadeIn 0.2s ease-out;
+  animation: searchSlideIn 0.15s ease-out;
 }
 
-@keyframes searchFadeIn {
+@keyframes searchSlideIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -45%);
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%);
+    transform: translateY(0);
   }
 }
 
 .custom-search-box .search-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 4px;
 }
 
 .custom-search-box .search-input {
   flex: 1;
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 8px 12px;
-  color: var(--color-text);
-  font-size: 14px;
+  background: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 2px;
+  padding: 4px 8px;
+  color: var(--vscode-foreground);
+  font-size: var(--font-size-base);
   font-family: inherit;
   outline: none;
-  transition: border-color 0.2s;
 }
 
 .custom-search-box .search-input:focus {
-  border-color: var(--color-primary);
+  border-color: var(--vscode-focusBorder);
 }
 
 .custom-search-box .search-controls {
   display: flex;
-  gap: 4px;
+  gap: 2px;
 }
 
 .custom-search-box .search-btn {
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 8px 12px;
-  color: var(--color-text);
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  padding: 4px 6px;
+  color: var(--vscode-foreground);
   font-size: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background var(--transition-fast);
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 32px;
 }
 
 .custom-search-box .search-btn:hover {
-  background: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
-}
-
-.custom-search-box .search-btn:active {
-  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .custom-search-box .close-btn {
   background: transparent;
   border: none;
-  color: var(--color-text-secondary);
-  font-size: 18px;
+  color: var(--vscode-descriptionForeground);
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: all 0.2s;
+  padding: 4px;
+  border-radius: 3px;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .custom-search-box .close-btn:hover {
-  background: var(--color-background);
-  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--vscode-foreground);
 }
 
 .custom-search-box .search-info {
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  text-align: center;
-  margin-top: 8px;
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  margin-top: 4px;
+  padding-left: 4px;
 }
 
-/* 搜索高亮样式 */
+/* Search highlight */
 .code-editor .monaco-editor .search-highlight {
-  background-color: rgba(255, 200, 0, 0.3) !important;
+  background-color: var(--vscode-editor-findMatchHighlightBackground) !important;
 }
 
-.code-editor .monaco-editor .search-highlight-inline {
-  background-color: rgba(255, 200, 0, 0.3) !important;
+.code-editor .monaco-editor .search-highlight-current {
+  background-color: var(--vscode-editor-findMatchBackground) !important;
+  border: 1px solid var(--vscode-editor-findMatchBorder) !important;
 }

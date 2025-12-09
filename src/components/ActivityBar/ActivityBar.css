@@ -1,0 +1,88 @@
+/* Pure Black Activity Bar */
+.activity-bar {
+  width: var(--activitybar-width);
+  min-width: var(--activitybar-width);
+  height: 100%;
+  background: var(--bg-activity-bar);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  user-select: none;
+  padding: 0;
+  border-right: none;
+  position: relative;
+}
+
+/* 右侧圆角分割线 - Activity Bar 与 Sidebar 之间 */
+.activity-bar::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--divider-color);
+  border-radius: 0.5px;
+}
+
+.activity-bar-top,
+.activity-bar-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.activity-bar-item {
+  width: var(--activitybar-width);
+  height: var(--activitybar-width);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.activity-bar-item:hover {
+  color: var(--text-primary);
+}
+
+.activity-bar-item.active {
+  color: var(--text-primary);
+}
+
+/* Active indicator - left accent border */
+.activity-bar-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+}
+
+.activity-bar-item svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Badge for problem count */
+.activity-bar-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}

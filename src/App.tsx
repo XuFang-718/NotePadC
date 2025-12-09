@@ -1,11 +1,15 @@
 import { useEffect, useCallback, useState, useRef } from 'react'
 import { useEditorStore, extractFilename } from './store/editorStore'
-import { Toolbar } from './components/Toolbar'
+import { TitleBar } from './components/TitleBar'
+import { ActivityBar, ActivityView } from './components/ActivityBar'
+import { Sidebar, SidebarView } from './components/Sidebar'
 import { TabBar } from './components/TabBar'
+import { Breadcrumb } from './components/Breadcrumb'
 import { CodeEditor } from './components/CodeEditor'
 import { Terminal } from './components/Terminal'
-import { SplitPane } from './components/SplitPane'
-import { ProblemPanel } from './components/ProblemPanel'
+import { Panel, PanelTab } from './components/Panel'
+import { StatusBar } from './components/StatusBar'
+import type { StatusBarRef } from './components/StatusBar/StatusBar'
 import { createInfoLine, errorsToOutputLines } from './utils/compilerParser'
 import { ThemeTransition } from './components/ThemeTransition'
 import { Problem } from './store/types'
@@ -17,11 +21,9 @@ function App() {
     activeTabId,
     isCompiling,
     isRunning,
-    splitRatio,
     isDarkMode,
     problems,
     selectedProblemId,
-    isProblemPanelCollapsed,
     addTab,
     removeTab,
     setActiveTab,
@@ -32,8 +34,6 @@ function App() {
     clearOutput,
     setCompiling,
     setRunning,
-    setSplitRatio,
-    toggleDarkMode,
     setDarkMode,
     getActiveTab,
     setProblems,
@@ -47,20 +47,52 @@ function App() {
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const [showThemeTransition, setShowThemeTransition] = useState(false)
   const [isConfigLoaded, setIsConfigLoaded] = useState(false)
+  const [cursorPosition, setCursorPosition] = useState({ line: 1, column: 1 })
+  const statusBarRef = useRef<StatusBarRef>(null)
 
-  const handleToggleDarkMode = useCallback(async () => {
-    setShowThemeTransition(true)
-    toggleDarkMode()
-    // 保存到配置文件
-    if (window.electronAPI) {
-      const newDarkMode = !isDarkMode
-      await window.electronAPI.setDarkMode(newDarkMode)
-    }
-  }, [toggleDarkMode, isDarkMode])
+  // Modern layout state - 水平三栏布局
+  const [activeView, setActiveView] = useState<ActivityView>('problems')
+  const [sidebarWidth, setSidebarWidth] = useState(240)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [terminalWidth, setTerminalWidth] = useState(320) // 终端宽度替代高度
+  const [isTerminalCollapsed, setIsTerminalCollapsed] = useState(false)
+  const [activePanelTab, setActivePanelTab] = useState<PanelTab>('terminal')
+  const [clearTrigger, setClearTrigger] = useState(0) // 用于触发终端清除
 
   const handleThemeAnimationEnd = useCallback(() => {
     setShowThemeTransition(false)
   }, [])
+
+  // 响应式布局 - 监听窗口大小变化
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth
+      // 窗口 < 800px 时自动折叠侧边栏
+      if (width < 800 && !isSidebarCollapsed) {
+        setIsSidebarCollapsed(true)
+      }
+      // 窗口 < 600px 时折叠终端
+      if (width < 600 && !isTerminalCollapsed) {
+        setIsTerminalCollapsed(true)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    // 初始检查
+    handleResize()
+    
+    return () => window.removeEventListener('resize', handleResize)
+  }, [isSidebarCollapsed, isTerminalCollapsed])
+
+  // Activity bar view change
+  const handleViewChange = useCallback((view: ActivityView) => {
+    if (view === activeView && !isSidebarCollapsed) {
+      setIsSidebarCollapsed(true)
+    } else {
+      setActiveView(view)
+      setIsSidebarCollapsed(false)
+    }
+  }, [activeView, isSidebarCollapsed])
 
   // File operations
   const handleNewFile = useCallback(() => {
@@ -102,12 +134,10 @@ function App() {
     
     let filepath = activeTab.filepath
     
-    // 如果文件没有保存过，自动保存到桌面的 NONAME.c
     if (!filepath) {
       filepath = await window.electronAPI.saveToDesktop(activeTab.content)
       updateTabFilepath(activeTab.id, filepath, 'NONAME.c')
     } else if (activeTab.isDirty) {
-      // 如果文件已保存但有修改，保存到原路径
       await window.electronAPI.saveFile(filepath, activeTab.content)
       markTabDirty(activeTab.id, false)
     }
@@ -121,7 +151,6 @@ function App() {
       if (result.success && result.executablePath) {
         setCompiling(false)
         setRunning(true)
-        
         await window.electronAPI.runExecutable(result.executablePath)
       } else {
         setCompiling(false)
@@ -145,24 +174,18 @@ function App() {
   }, [setRunning])
 
   const handleTabClose = useCallback((tabId: string) => {
-    const tab = tabs.find(t => t.id === tabId)
-    if (tab?.isDirty) {
-      // In a real app, show confirmation dialog
-      // For now, just close
-    }
     removeTab(tabId)
-  }, [tabs, removeTab])
+  }, [removeTab])
+
 
   // Auto save effect
   useEffect(() => {
     if (!autoSaveEnabled || !activeTab || !activeTab.isDirty) return
 
-    // Clear existing timer
     if (autoSaveTimerRef.current) {
       clearTimeout(autoSaveTimerRef.current)
     }
 
-    // Set new timer for auto save (1 second delay)
     autoSaveTimerRef.current = setTimeout(async () => {
       if (!window.electronAPI || !activeTab) return
       
@@ -183,7 +206,6 @@ function App() {
   useEffect(() => {
     if (!window.electronAPI) return
 
-    // Terminal 组件会处理输出，这里只处理退出状态
     const unsubExit = window.electronAPI.onProcessExit(() => {
       setRunning(false)
     })
@@ -196,6 +218,10 @@ function App() {
     const unsubAutoSave = window.electronAPI.onMenuAutoSaveToggle((enabled) => {
       setAutoSaveEnabled(enabled)
     })
+    
+    const unsubToggleProblems = window.electronAPI.onMenuToggleProblems((show) => {
+      setIsSidebarCollapsed(!show)
+    })
 
     return () => {
       unsubExit()
@@ -205,6 +231,7 @@ function App() {
       unsubRun()
       unsubStop()
       unsubAutoSave()
+      unsubToggleProblems()
     }
   }, [setRunning, handleNewFile, handleOpenFile, handleSaveFile, handleRun, handleStop])
 
@@ -237,6 +264,28 @@ function App() {
               handleStop()
             }
             break
+          case 'b':
+            e.preventDefault()
+            setIsSidebarCollapsed(prev => !prev)
+            break
+          case 'j':
+            e.preventDefault()
+            setIsTerminalCollapsed(prev => !prev)
+            break
+          case 't':
+            e.preventDefault()
+            if (statusBarRef.current) {
+              statusBarRef.current.toggleTimer()
+            }
+            break
+          case 'e':
+            if (e.shiftKey) {
+              e.preventDefault()
+              if (statusBarRef.current) {
+                statusBarRef.current.stopTimer()
+              }
+            }
+            break
         }
       }
     }
@@ -248,32 +297,25 @@ function App() {
   // Load config and create initial tab on mount
   useEffect(() => {
     const initApp = async () => {
-      // 加载配置
       if (window.electronAPI) {
         const config = await window.electronAPI.getConfig()
-        // 直接设置暗色模式（不是 toggle）
         setDarkMode(config.isDarkMode)
-        // 应用自动保存设置
         setAutoSaveEnabled(config.autoSaveEnabled)
         
-        // 加载题目配置
         const problemConfig = await window.electronAPI.loadProblems()
         if (problemConfig?.problems) {
           setProblems(problemConfig.problems)
         }
       }
       
-      // 标记配置已加载
       setIsConfigLoaded(true)
       
-      // 创建初始标签页
       const currentTabs = useEditorStore.getState().tabs
       if (currentTabs.length === 0) {
         addTab({})
       }
     }
     initApp()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // File drop handler
@@ -318,41 +360,39 @@ function App() {
     }
   }, [addTab])
 
-  // 开始编程 - 加载题目模板或用户代码
+  // Start coding handler
   const handleStartCoding = useCallback(async (problem: Problem) => {
-    // 检查是否有用户保存的代码
     let code = getUserCode(problem.id)
     
     if (!code && window.electronAPI) {
-      // 尝试从文件加载
       code = await window.electronAPI.loadUserCode(problem.id)
       if (code) {
         saveUserCode(problem.id, code)
       }
     }
     
-    // 使用用户代码或模板
     const content = code || problem.template
     
-    // 创建新标签页
     addTab({
       filename: `${problem.title}.c`,
       content,
       isDirty: false,
       problemId: problem.id
     })
+    
+    if (statusBarRef.current) {
+      statusBarRef.current.startTimer()
+    }
   }, [getUserCode, saveUserCode, addTab])
 
-  // 保存用户代码到文件
+  // Content change handler
   const handleContentChangeWithSave = useCallback((content: string) => {
     if (activeTabId) {
       updateTabContent(activeTabId, content)
       
-      // 如果是题目相关的标签页，保存用户代码
       const tab = tabs.find(t => t.id === activeTabId)
       if (tab?.problemId) {
         saveUserCode(tab.problemId, content)
-        // 异步保存到文件
         if (window.electronAPI) {
           window.electronAPI.saveUserCode(tab.problemId, content)
         }
@@ -360,10 +400,33 @@ function App() {
     }
   }, [activeTabId, updateTabContent, tabs, saveUserCode])
 
-  // 配置加载完成前不渲染主界面，避免主题闪烁
+  // Cursor change handler
+  const handleCursorChange = useCallback((line: number, column: number) => {
+    setCursorPosition({ line, column })
+  }, [])
+
+  // Timer end handler
+  const handleTimerEnd = useCallback((elapsedTime: number) => {
+    const totalSeconds = Math.floor(elapsedTime / 1000)
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    const timeStr = minutes > 0 
+      ? `${minutes}分${seconds}秒` 
+      : `${seconds}秒`
+    
+    appendOutput({ 
+      type: 'info', 
+      content: `⏱ 编程用时: ${timeStr}` 
+    })
+  }, [appendOutput])
+
+  // Loading state
   if (!isConfigLoaded) {
-    return <div className="app" style={{ backgroundColor: 'var(--bg-primary)' }} />
+    return <div className="app" style={{ backgroundColor: '#0D0D0D' }} />
   }
+
+  // 简化的 sidebar view - 只有 problems
+  const sidebarView: SidebarView = 'problems'
 
   return (
     <div className="app">
@@ -372,60 +435,92 @@ function App() {
         show={showThemeTransition} 
         onAnimationEnd={handleThemeAnimationEnd} 
       />
-      <Toolbar
-        onNewFile={handleNewFile}
-        onOpenFile={handleOpenFile}
-        onSaveFile={handleSaveFile}
-        onRun={handleRun}
-        onStop={handleStop}
-        onToggleDarkMode={handleToggleDarkMode}
-        isRunning={isRunning}
-        isCompiling={isCompiling}
-        canSave={!!activeTab}
-        isDarkMode={isDarkMode}
-      />
-      <TabBar
-        tabs={tabs}
-        activeTabId={activeTabId}
-        onTabSelect={setActiveTab}
-        onTabClose={handleTabClose}
-      />
-      <div className="main-content">
-        <ProblemPanel
+      
+      {/* Title Bar */}
+      <TitleBar title={activeTab?.filename || 'NotePadC'} />
+      
+      {/* Main Layout */}
+      <div className="main-layout">
+        {/* Activity Bar */}
+        <ActivityBar
+          activeView={activeView}
+          onViewChange={handleViewChange}
+          problemCount={problems.length}
+        />
+        
+        {/* Sidebar */}
+        <Sidebar
+          view={sidebarView}
+          width={sidebarWidth}
+          onResize={setSidebarWidth}
+          isCollapsed={isSidebarCollapsed}
           problems={problems}
           selectedProblemId={selectedProblemId}
           onSelectProblem={selectProblem}
           onStartCoding={handleStartCoding}
-          isCollapsed={isProblemPanelCollapsed}
         />
-        <SplitPane
-          left={
+        
+        {/* Workbench (Editor + Terminal 水平布局) */}
+        <div className="workbench">
+          {/* Editor Area - 圆角容器 */}
+          <div className="editor-area">
+            <TabBar
+              tabs={tabs}
+              activeTabId={activeTabId}
+              onTabSelect={setActiveTab}
+              onTabClose={handleTabClose}
+            />
+            
             <div className="editor-container">
               {activeTab ? (
                 <CodeEditor
                   value={activeTab.content}
                   onChange={handleContentChangeWithSave}
+                  onCursorChange={handleCursorChange}
                 />
               ) : (
                 <div className="editor-empty">
-                  <p>No file open</p>
-                  <p>Press ⌘N to create a new file</p>
+                  <p>没有打开的文件</p>
+                  <p>按 ⌘N 创建新文件</p>
                 </div>
               )}
             </div>
-          }
-          right={
+          </div>
+          
+          {/* Terminal Panel - 右侧面板 */}
+          <Panel
+            activeTab={activePanelTab}
+            onTabChange={setActivePanelTab}
+            width={terminalWidth}
+            onResize={setTerminalWidth}
+            isCollapsed={isTerminalCollapsed}
+            onToggleCollapse={() => setIsTerminalCollapsed(prev => !prev)}
+            onClear={() => {
+              clearOutput()
+              setClearTrigger(prev => prev + 1)
+            }}
+          >
             <Terminal
               isRunning={isRunning}
               isCompiling={isCompiling}
               isDarkMode={isDarkMode}
               onClear={clearOutput}
+              clearTrigger={clearTrigger}
             />
-          }
-          ratio={splitRatio}
-          onResize={setSplitRatio}
-        />
+          </Panel>
+        </div>
       </div>
+      
+      {/* Status Bar */}
+      <StatusBar
+        ref={statusBarRef}
+        isCompiling={isCompiling}
+        isRunning={isRunning}
+        isDirty={activeTab?.isDirty ?? false}
+        line={cursorPosition.line}
+        column={cursorPosition.column}
+        onTimerEnd={handleTimerEnd}
+      />
     </div>
   )
 }

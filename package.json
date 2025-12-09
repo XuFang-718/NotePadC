@@ -1,6 +1,6 @@
 {
   "name": "notepadc",
-  "version": "2",
+  "version": "2.0.0",
   "description": "NotePadC - A lightweight C code editor with blue-white theme, optimized for macOS",
   "main": "dist-electron/main.js",
   "scripts": {

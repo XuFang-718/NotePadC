@@ -1,0 +1,58 @@
+/* Pure Black Breadcrumb */
+.breadcrumb {
+  height: var(--breadcrumb-height);
+  min-height: var(--breadcrumb-height);
+  background: var(--bg-editor);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  overflow: hidden;
+}
+
+.breadcrumb-content {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.breadcrumb-item:hover {
+  background: var(--bg-hover);
+}
+
+.breadcrumb-folder {
+  color: var(--text-secondary);
+}
+
+.breadcrumb-file {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breadcrumb-file-icon {
+  flex-shrink: 0;
+}
+
+.breadcrumb-filename {
+  color: var(--vscode-foreground);
+}
+
+.breadcrumb-separator {
+  color: var(--vscode-disabledForeground);
+  flex-shrink: 0;
+}

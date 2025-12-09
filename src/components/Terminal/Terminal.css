@@ -1,54 +1,19 @@
+/* VSCode-style Terminal */
 .terminal-panel {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--color-background);
-}
-
-.terminal-header {
-  height: 36px;
-  min-height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 12px;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.terminal-title {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-}
-
-.terminal-clear-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.terminal-clear-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-  color: var(--color-text);
+  background: var(--vscode-panel-background);
 }
 
 .terminal-container {
   flex: 1;
-  padding: 8px;
+  padding: 4px 8px;
   overflow: hidden;
+  background: var(--vscode-panel-background);
 }
 
-/* xterm.js 样式覆盖 */
+/* xterm.js style overrides */
 .terminal-container .xterm {
   height: 100%;
 }
@@ -57,11 +22,23 @@
   overflow-y: auto !important;
 }
 
+.terminal-container .xterm-viewport::-webkit-scrollbar {
+  width: 10px;
+}
+
+.terminal-container .xterm-viewport::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background);
+}
+
+.terminal-container .xterm-viewport::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
 .terminal-container .xterm-screen {
   height: 100%;
 }
 
-/* 暗色主题调整 */
-[data-theme="dark"] .terminal-clear-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+/* Terminal cursor */
+.terminal-container .xterm-cursor-layer {
+  z-index: 1;
 }

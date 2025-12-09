@@ -15,9 +15,9 @@
 }
 
 .split-pane-divider {
-  width: 6px;
+  width: 1px;
   height: 100%;
-  background: var(--color-border);
+  background: var(--vscode-panel-border);
   cursor: col-resize;
   position: relative;
   flex-shrink: 0;
@@ -26,23 +26,10 @@
 
 .split-pane-divider:hover,
 .split-pane-divider.dragging {
-  background: var(--color-primary);
+  background: var(--vscode-focusBorder);
+  width: 2px;
 }
 
 .split-pane-divider-handle {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 4px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 2px;
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-}
-
-.split-pane-divider:hover .split-pane-divider-handle,
-.split-pane-divider.dragging .split-pane-divider-handle {
-  opacity: 1;
+  display: none;
 }

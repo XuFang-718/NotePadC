@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, memo } from 'react'
+import { useEffect, useRef, memo } from 'react'
 import { Terminal as XTerm } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import '@xterm/xterm/css/xterm.css'
@@ -9,13 +9,13 @@ interface TerminalProps {
   isCompiling: boolean
   isDarkMode: boolean
   onClear: () => void
+  clearTrigger?: number  // 用于触发清除的计数器
 }
 
 export const Terminal = memo(({
-  isRunning,
   isCompiling,
   isDarkMode,
-  onClear
+  clearTrigger
 }: TerminalProps) => {
   const terminalRef = useRef<HTMLDivElement>(null)
   const xtermRef = useRef<XTerm | null>(null)
@@ -97,7 +97,7 @@ export const Terminal = memo(({
     fitAddonRef.current = fitAddon
 
     // 处理用户输入
-    xterm.onData((data) => {
+    xterm.onData((data: string) => {
       if (window.electronAPI) {
         window.electronAPI.sendInput(data)
       }
@@ -134,6 +134,14 @@ export const Terminal = memo(({
       xtermRef.current.write('\x1b[2J\x1b[H') // 清屏并移动光标到左上角
     }
   }, [isCompiling])
+
+  // 响应清除按钮点击
+  useEffect(() => {
+    if (clearTrigger && clearTrigger > 0 && xtermRef.current) {
+      xtermRef.current.clear()
+      xtermRef.current.write('\x1b[2J\x1b[H') // 清屏并移动光标到左上角
+    }
+  }, [clearTrigger])
 
   // 更新主题
   useEffect(() => {
@@ -223,14 +231,6 @@ export const Terminal = memo(({
     }
   }, [])
 
-  // 处理清除
-  const handleClear = useCallback(() => {
-    if (xtermRef.current) {
-      xtermRef.current.clear()
-    }
-    onClear()
-  }, [onClear])
-
   // 适配大小（当面板大小变化时）
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
@@ -251,19 +251,8 @@ export const Terminal = memo(({
     }
   }, [])
 
-  // 获取标题
-  const title = isCompiling ? '⏳ 编译中...' : isRunning ? '▶ 运行中' : '终端'
-
   return (
     <div className="terminal-panel">
-      <div className="terminal-header">
-        <span className="terminal-title">{title}</span>
-        <button className="terminal-clear-btn" onClick={handleClear} title="清除终端">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-        </button>
-      </div>
       <div className="terminal-container" ref={terminalRef} />
     </div>
   )

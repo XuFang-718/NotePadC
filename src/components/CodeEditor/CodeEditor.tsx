@@ -20,16 +20,21 @@ let monacoInstance: typeof Monaco | null = null
 interface CodeEditorProps {
   value: string
   onChange: (value: string) => void
+  onCursorChange?: (line: number, column: number) => void
 }
 
 // 使用 memo 避免不必要的重渲染
-export const CodeEditor: React.FC<CodeEditorProps> = memo(({ value, onChange }) => {
+export const CodeEditor: React.FC<CodeEditorProps> = memo(({ value, onChange, onCursorChange }) => {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
   const isDarkMode = useEditorStore((state) => state.isDarkMode)
   const [showSearch, setShowSearch] = useState(false)
   // 使用 ref 存储最新的 value，避免闪烁
   const valueRef = useRef(value)
   valueRef.current = value
+  
+  // 使用 ref 存储最新的 onCursorChange 回调，避免闭包问题
+  const onCursorChangeRef = useRef(onCursorChange)
+  onCursorChangeRef.current = onCursorChange
 
   const handleEditorMount: OnMount = useCallback((editor, monaco) => {
     editorRef.current = editor
@@ -61,6 +66,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = memo(({ value, onChange }) 
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF, () => {
       setShowSearch(true)
     })
+    
+    // 监听光标位置变化 - 使用 ref 获取最新的回调
+    editor.onDidChangeCursorPosition((e) => {
+      if (onCursorChangeRef.current) {
+        onCursorChangeRef.current(e.position.lineNumber, e.position.column)
+      }
+    })
+    
+    // 初始化光标位置
+    const position = editor.getPosition()
+    if (position && onCursorChangeRef.current) {
+      onCursorChangeRef.current(position.lineNumber, position.column)
+    }
     
     // Focus editor
     editor.focus()
@@ -154,7 +172,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = memo(({ value, onChange }) 
     </div>
   )
 }, (prevProps, nextProps) => {
-  // 自定义比较函数：只有 value 真正改变时才重渲染
+  // 自定义比较函数：只比较 value（onCursorChange 通过 ref 处理）
   return prevProps.value === nextProps.value
 })
 

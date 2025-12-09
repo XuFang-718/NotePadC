@@ -1,37 +1,124 @@
+/* Modern App Layout - 现代化布局 */
 .app {
   height: 100%;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  background: var(--color-background);
+  display: grid;
+  grid-template-rows: var(--titlebar-height) 1fr var(--statusbar-height);
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "titlebar"
+    "main"
+    "statusbar";
+  background: var(--bg-main);
+  overflow: hidden;
 }
 
-.main-content {
-  flex: 1;
+/* ==================== TITLE BAR AREA ==================== */
+.app > .titlebar {
+  grid-area: titlebar;
+}
+
+/* ==================== MAIN CONTENT AREA ==================== */
+.main-layout {
+  grid-area: main;
   display: flex;
   overflow: hidden;
 }
 
-.main-content > .split-pane {
+/* ==================== ACTIVITY BAR ==================== */
+.main-layout > .activity-bar {
+  flex-shrink: 0;
+}
+
+/* ==================== SIDEBAR ==================== */
+.main-layout > .sidebar {
+  flex-shrink: 0;
+}
+
+/* ==================== WORKBENCH (Editor + Terminal 水平布局) ==================== */
+.workbench {
   flex: 1;
+  display: flex;
+  flex-direction: row; /* 水平布局 */
+  overflow: hidden;
+  min-width: 0;
+  gap: 0; /* 无间隙 */
+  padding: 0; /* 无内边距，贴近窗口 */
+}
+
+/* ==================== EDITOR AREA ==================== */
+.editor-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 400px;
+  background: var(--bg-editor);
+  position: relative;
+}
+
+/* 左侧圆角分割线 - 题目管理器与编辑器之间 */
+.editor-area::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--divider-color);
+  border-radius: 0.5px;
+  z-index: 5;
+}
+
+.editor-area > .tabbar {
+  flex-shrink: 0;
+}
+
+.editor-area > .breadcrumb {
+  flex-shrink: 0;
 }
 
 .editor-container {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
+  flex: 1;
   overflow: hidden;
+  background: var(--bg-editor);
 }
 
+/* ==================== PANEL AREA - 右侧终端面板 ==================== */
+.workbench > .panel {
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 左侧圆角分割线 - 编辑器与终端之间 */
+.workbench > .panel::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--divider-color);
+  border-radius: 0.5px;
+  z-index: 5;
+}
+
+/* ==================== STATUS BAR AREA ==================== */
+.app > .status-bar {
+  grid-area: statusbar;
+}
+
+/* ==================== EMPTY EDITOR STATE ==================== */
 .editor-empty {
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   gap: 8px;
+  background: var(--bg-editor);
 }
 
 .editor-empty p {
@@ -41,8 +128,33 @@
 .editor-empty p:first-child {
   font-size: 16px;
   font-weight: 500;
+  color: var(--text-primary);
 }
 
 .editor-empty p:last-child {
   font-size: 13px;
+  opacity: 0.7;
+}
+
+/* ==================== SPLIT PANE OVERRIDE ==================== */
+.split-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.split-pane-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ==================== COLLAPSED STATES ==================== */
+.sidebar-collapsed .sidebar {
+  display: none;
+}
+
+.panel-collapsed .panel {
+  display: none;
 }

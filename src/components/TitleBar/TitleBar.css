@@ -1,0 +1,60 @@
+/* Modern TitleBar */
+.titlebar {
+  height: var(--titlebar-height);
+  min-height: var(--titlebar-height);
+  background: var(--bg-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.titlebar-drag-region {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  -webkit-app-region: drag;
+}
+
+/* macOS traffic lights space */
+.titlebar::before {
+  content: '';
+  width: 70px;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.titlebar-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.titlebar-title-text {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.titlebar-controls {
+  width: 70px;
+  flex-shrink: 0;
+}
+
+/* Window focused state */
+.titlebar.focused {
+  background: var(--bg-main);
+}
+
+.titlebar.focused .titlebar-title-text {
+  opacity: 1;
+  color: var(--text-primary);
+}

@@ -1,0 +1,147 @@
+/* Modern Status Bar - 简约设计 */
+.status-bar {
+  height: var(--statusbar-height);
+  min-height: var(--statusbar-height);
+  background: var(--bg-main);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  font-size: 12px;
+  user-select: none;
+}
+
+/* Running/Debugging state */
+.status-bar.running {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ==================== STATUS BAR SECTIONS ==================== */
+.status-bar-left,
+.status-bar-right {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.status-bar-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* ==================== STATUS ITEMS ==================== */
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 18px;
+  padding: 0 8px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border-radius: var(--radius-sm);
+}
+
+.status-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.status-text {
+  white-space: nowrap;
+}
+
+/* ==================== STATUS STATES ==================== */
+.status-state {
+  gap: 6px;
+}
+
+.status-state.compiling .status-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ==================== CURSOR POSITION ==================== */
+.cursor-position {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==================== LANGUAGE ==================== */
+.language {
+  font-weight: 500;
+}
+
+/* ==================== TIMER ==================== */
+.timer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  padding: 0 8px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  font-variant-numeric: tabular-nums;
+}
+
+.timer:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.timer-icon {
+  display: flex;
+  align-items: center;
+}
+
+.timer-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.timer-value {
+  min-width: 48px;
+  text-align: center;
+}
+
+.timer.running .timer-icon {
+  color: #4ade80;
+}
+
+.timer.paused .timer-icon {
+  color: #fbbf24;
+}
+
+.timer-paused-indicator {
+  display: flex;
+  align-items: center;
+  margin-left: 2px;
+  opacity: 0.7;
+}
+
+.timer-paused-indicator svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* ==================== ENCODING & LINE ENDING ==================== */
+.encoding,
+.line-ending {
+  opacity: 0.9;
+}

@@ -1,44 +1,138 @@
+/* Pure Black Theme - Global CSS Variables */
 :root {
-  --color-primary: #007AFF;
-  --color-primary-hover: #0056CC;
-  --color-background: #FFFFFF;
-  --color-surface: #F5F5F7;
-  --color-border: #E5E5E5;
-  --color-text: #1D1D1F;
-  --color-text-secondary: #86868B;
-  --color-error: #FF3B30;
-  --color-success: #34C759;
+  /* ==================== PURE BLACK THEME COLORS ==================== */
+  --bg-main: #000000;
+  --bg-activity-bar: #1a1a1a;  /* 与编辑器同色 */
+  --bg-sidebar: #1a1a1a;  /* 与编辑器同色 */
+  --bg-editor: #1a1a1a;
+  --bg-terminal: #1a1a1a;  /* 与编辑器同色 */
+  --bg-hover: #252525;
   
-  --transition-fast: 150ms ease;
-  --transition-normal: 200ms ease;
-  --transition-slow: 300ms ease;
+  /* 圆角分割线颜色 - 和图片一样的深灰色 */
+  --divider-color: #333333;
+  --bg-selected: #094771;
+  --accent: #007ACC;
+  --text-primary: #E1E1E1;
+  --text-secondary: #6E6E6E;
+  --border-color: #2a2a2a;
   
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  
+  /* ==================== BORDER RADIUS ==================== */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
-}
-
-/* 暗色模式 */
-[data-theme="dark"] {
-  --color-primary: #0A84FF;
-  --color-primary-hover: #409CFF;
-  --color-background: #1C1C1E;
-  --color-surface: #2C2C2E;
-  --color-border: #3A3A3C;
-  --color-text: #F5F5F7;
-  --color-text-secondary: #98989D;
-  --color-error: #FF453A;
-  --color-success: #30D158;
   
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  /* ==================== SHADOWS ==================== */
+  --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.4);
+  
+  /* ==================== GAPS ==================== */
+  --gap-section: 8px;
+  --gap-item: 4px;
+
+  /* ==================== KIRO BACKGROUNDS (Legacy + Updated) ==================== */
+  --vscode-editor-background: var(--bg-editor);
+  --vscode-sideBar-background: var(--bg-sidebar);
+  --vscode-activityBar-background: var(--bg-activity-bar);
+  --vscode-titleBar-background: var(--bg-main);
+  --vscode-titleBar-activeBackground: var(--bg-main);
+  --vscode-tab-activeBackground: var(--bg-editor);
+  --vscode-tab-inactiveBackground: var(--bg-main);
+  --vscode-tab-hoverBackground: var(--bg-hover);
+  --vscode-panel-background: var(--bg-terminal);
+  --vscode-statusBar-background: var(--bg-main);
+  --vscode-statusBar-debuggingBackground: var(--accent);
+  --vscode-input-background: #2D2D2D;
+  --vscode-dropdown-background: #2D2D2D;
+  --vscode-button-background: var(--accent);
+  --vscode-button-hoverBackground: #1A8AD4;
+
+  /* ==================== TEXT COLORS ==================== */
+  --vscode-foreground: var(--text-primary);
+  --vscode-editor-foreground: var(--text-primary);
+  --vscode-descriptionForeground: var(--text-secondary);
+  --vscode-disabledForeground: #4D4D4D;
+  --vscode-errorForeground: #F14C4C;
+  --vscode-warningForeground: #CCA700;
+  --vscode-tab-activeForeground: var(--text-primary);
+  --vscode-tab-inactiveForeground: var(--text-secondary);
+  --vscode-statusBar-foreground: var(--text-secondary);
+  --vscode-sideBarTitle-foreground: var(--text-secondary);
+  --vscode-sideBarSectionHeader-foreground: var(--text-primary);
+
+  /* ==================== KIRO BORDERS ==================== */
+  --vscode-panel-border: #2D2D2D;
+  --vscode-sideBar-border: #2D2D2D;
+  --vscode-activityBar-border: transparent;
+  --vscode-titleBar-border: #2D2D2D;
+  --vscode-tab-border: #181818;
+  --vscode-input-border: #2D2D2D;
+  --vscode-focusBorder: #007ACC;
+
+  /* ==================== KIRO ACCENTS ==================== */
+  --vscode-activityBar-activeBorder: #E1E1E1;
+  --vscode-activityBar-inactiveForeground: #6E6E6E;
+  --vscode-activityBar-foreground: #E1E1E1;
+  --vscode-tab-activeBorderTop: #007ACC;
+  --vscode-panelTitle-activeBorder: #007ACC;
+  --vscode-panelTitle-activeForeground: #E1E1E1;
+  --vscode-panelTitle-inactiveForeground: #6E6E6E;
+
+  /* ==================== LIST/TREE ==================== */
+  --vscode-list-hoverBackground: var(--bg-hover);
+  --vscode-list-activeSelectionBackground: var(--bg-selected);
+  --vscode-list-activeSelectionForeground: #FFFFFF;
+  --vscode-list-inactiveSelectionBackground: #2D2D2D;
+  --vscode-list-inactiveSelectionForeground: var(--text-primary);
+  --vscode-tree-indentGuidesStroke: #2D2D2D;
+
+  /* ==================== EDITOR ==================== */
+  --vscode-editorLineNumber-foreground: var(--text-secondary);
+  --vscode-editorLineNumber-activeForeground: var(--text-primary);
+  --vscode-editor-lineHighlightBackground: #222222;
+  --vscode-editor-selectionBackground: #264F78;
+  --vscode-editorCursor-foreground: var(--text-primary);
+  --vscode-editorIndentGuide-background: #2D2D2D;
+  --vscode-editorIndentGuide-activeBackground: #4D4D4D;
+
+  /* ==================== KIRO SCROLLBAR ==================== */
+  --vscode-scrollbarSlider-background: rgba(110, 110, 110, 0.3);
+  --vscode-scrollbarSlider-hoverBackground: rgba(110, 110, 110, 0.5);
+  --vscode-scrollbarSlider-activeBackground: rgba(110, 110, 110, 0.6);
+
+  /* ==================== FILE ICONS ==================== */
+  --vscode-icon-c-file: #519ABA;
+  --vscode-icon-h-file: #A074C4;
+  --vscode-icon-folder-closed: #6E6E6E;
+  --vscode-icon-folder-open: #DCAD5A;
+
+  /* ==================== LAYOUT DIMENSIONS ==================== */
+  --titlebar-height: 40px;
+  --activitybar-width: 48px;
+  --sidebar-min-width: 200px;
+  --sidebar-max-width: 400px;
+  --sidebar-default-width: 240px;
+  --tabbar-height: 36px;
+  --breadcrumb-height: 22px;
+  --panel-min-width: 280px;
+  --panel-default-width: 320px;
+  --statusbar-height: 24px;
+  --panel-header-height: 40px;
+
+  /* ==================== TYPOGRAPHY ==================== */
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono: 'SF Mono', Monaco, 'Courier New', monospace;
+  --font-size-base: 13px;
+  --font-size-small: 11px;
+  --font-size-tiny: 10px;
+  --line-height: 1.4;
+
+  /* ==================== TRANSITIONS ==================== */
+  --transition-fast: 100ms ease;
+  --transition-normal: 150ms ease;
+  --transition-slow: 200ms ease;
 }
 
+/* ==================== GLOBAL RESET ==================== */
 * {
   margin: 0;
   padding: 0;
@@ -52,24 +146,19 @@ html, body, #root {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
-  background-color: var(--color-background);
-  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  background-color: var(--bg-main);
+  color: var(--vscode-foreground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: var(--line-height);
 }
 
-.app {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Scrollbar styling */
+/* ==================== SCROLLBAR STYLING ==================== */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -77,21 +166,31 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 4px;
+  background: var(--vscode-scrollbarSlider-background);
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-secondary);
+  background: var(--vscode-scrollbarSlider-hoverBackground);
 }
 
-/* Button base styles */
+::-webkit-scrollbar-thumb:active {
+  background: var(--vscode-scrollbarSlider-activeBackground);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ==================== BUTTON BASE ==================== */
 button {
   font-family: inherit;
+  font-size: inherit;
   cursor: pointer;
   border: none;
   outline: none;
-  transition: all var(--transition-fast);
+  background: transparent;
+  color: inherit;
 }
 
 button:disabled {
@@ -99,16 +198,51 @@ button:disabled {
   opacity: 0.5;
 }
 
-/* Input base styles */
+button:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+/* ==================== INPUT BASE ==================== */
 input, textarea {
   font-family: inherit;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
+  font-size: inherit;
+  background: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border);
+  color: var(--vscode-foreground);
   outline: none;
-  transition: border-color var(--transition-fast);
 }
 
 input:focus, textarea:focus {
-  border-color: var(--color-primary);
+  border-color: var(--vscode-focusBorder);
+}
+
+/* ==================== SELECTION ==================== */
+::selection {
+  background: var(--vscode-editor-selectionBackground);
+}
+
+/* ==================== UTILITY CLASSES ==================== */
+.codicon {
+  font-family: 'codicon';
+  font-size: 16px;
+  line-height: 1;
+}
+
+.ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }

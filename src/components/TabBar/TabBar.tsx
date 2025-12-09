@@ -9,6 +9,27 @@ interface TabBarProps {
   onTabClose: (tabId: string) => void
 }
 
+// File icon component
+const FileIcon = ({ filename }: { filename: string }) => {
+  const ext = filename.split('.').pop()?.toLowerCase()
+  const color = ext === 'c' ? 'var(--vscode-icon-c-file)' : 
+                ext === 'h' ? 'var(--vscode-icon-h-file)' : 
+                'var(--vscode-foreground)'
+  
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="tab-file-icon">
+      <path d="M13.85 4.44l-3.29-3.3A.47.47 0 0010.23 1H3.5a.5.5 0 00-.5.5v13a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V4.77a.47.47 0 00-.15-.33zM10.5 2.71L12.29 4.5H10.5V2.71zM12 14H4V2h5.5v3a.5.5 0 00.5.5h2V14z" fill={color}/>
+    </svg>
+  )
+}
+
+// Close icon
+const CloseIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.708L8 8.707z"/>
+  </svg>
+)
+
 export const TabBar: React.FC<TabBarProps> = ({
   tabs,
   activeTabId,
@@ -21,39 +42,40 @@ export const TabBar: React.FC<TabBarProps> = ({
   }
 
   if (tabs.length === 0) {
-    return <div className="tab-bar tab-bar-empty" />
+    return <div className="tabbar tabbar-empty" />
   }
 
   return (
-    <div className="tab-bar">
-      <div className="tab-list">
-        {tabs.map((tab) => (
-          <div
-            key={tab.id}
-            className={`tab ${tab.id === activeTabId ? 'tab-active' : ''}`}
-            onClick={() => onTabSelect(tab.id)}
-          >
-            <span className="tab-icon">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <path d="M3 2h6l4 4v8a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.2" fill="none"/>
-                <path d="M9 2v4h4" stroke="currentColor" strokeWidth="1.2" fill="none"/>
-              </svg>
-            </span>
-            <span className="tab-name">
-              {tab.isDirty && <span className="tab-dirty">●</span>}
-              {tab.filename}
-            </span>
-            <button
-              className="tab-close"
-              onClick={(e) => handleClose(e, tab.id)}
-              title="Close"
+    <div className="tabbar">
+      <div className="tabbar-tabs">
+        {tabs.map((tab) => {
+          const isActive = tab.id === activeTabId
+          
+          return (
+            <div
+              key={tab.id}
+              className={`tab ${isActive ? 'tab-active' : 'tab-inactive'}`}
+              onClick={() => onTabSelect(tab.id)}
             >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </button>
-          </div>
-        ))}
+              <FileIcon filename={tab.filename} />
+              <span className="tab-label">
+                {tab.filename}
+              </span>
+              <div className="tab-actions">
+                {tab.isDirty && (
+                  <span className="tab-dirty-indicator" title="Unsaved changes">*</span>
+                )}
+                <button
+                  className="tab-close-btn"
+                  onClick={(e) => handleClose(e, tab.id)}
+                  title="Close"
+                >
+                  <CloseIcon />
+                </button>
+              </div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
