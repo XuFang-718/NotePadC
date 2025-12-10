@@ -67,6 +67,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = memo(({ value, onChange, on
       setShowSearch(true)
     })
     
+
+    
     // 监听光标位置变化 - 使用 ref 获取最新的回调
     editor.onDidChangeCursorPosition((e) => {
       if (onCursorChangeRef.current) {

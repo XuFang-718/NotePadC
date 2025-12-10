@@ -17,6 +17,8 @@ export interface StatusBarRef {
   toggleTimer: () => void
   getElapsedTime: () => number
   isRunning: () => boolean
+  isPaused: () => boolean
+  getTimerState: () => 'stopped' | 'running' | 'paused'
 }
 
 type TimerState = 'stopped' | 'running' | 'paused'
@@ -168,17 +170,34 @@ export const StatusBar = memo(forwardRef<StatusBarRef, StatusBarProps>(({
         timerRef.current = setInterval(() => {
           setElapsedTime(Date.now() - startTimeRef.current)
         }, 100)
+      } else if (timerState === 'paused') {
+        // 从暂停状态恢复
+        startTimeRef.current = Date.now() - pausedTimeRef.current
+        setTimerState('running')
+        timerRef.current = setInterval(() => {
+          setElapsedTime(Date.now() - startTimeRef.current)
+        }, 100)
       }
     },
     pauseTimer,
     stopTimer,
+    // toggleTimer: 开关计时器 - 如果在运行或暂停状态则停止并归零，如果停止则开始
     toggleTimer: () => {
-      if (timerState === 'running') {
-        pauseTimer()
-      } else if (timerState === 'paused') {
-        startTimer()
+      if (timerState === 'running' || timerState === 'paused') {
+        // 停止计时器
+        if (timerRef.current) {
+          clearInterval(timerRef.current)
+          timerRef.current = null
+        }
+        const finalTime = elapsedTime
+        setTimerState('stopped')
+        setElapsedTime(0)
+        pausedTimeRef.current = 0
+        if (onTimerEnd && finalTime > 0) {
+          onTimerEnd(finalTime)
+        }
       } else {
-        // Start new timer
+        // 开始新计时器
         startTimeRef.current = Date.now()
         pausedTimeRef.current = 0
         setTimerState('running')
@@ -188,8 +207,10 @@ export const StatusBar = memo(forwardRef<StatusBarRef, StatusBarProps>(({
       }
     },
     getElapsedTime: () => elapsedTime,
-    isRunning: () => timerState === 'running'
-  }), [timerState, elapsedTime, pauseTimer, stopTimer, startTimer])
+    isRunning: () => timerState === 'running',
+    isPaused: () => timerState === 'paused',
+    getTimerState: () => timerState
+  }), [timerState, elapsedTime, pauseTimer, stopTimer, startTimer, onTimerEnd])
 
   useEffect(() => {
     return () => {

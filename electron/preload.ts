@@ -124,5 +124,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const handler = (_: unknown, show: boolean) => callback(show)
     ipcRenderer.on('menu-toggle-problems', handler)
     return () => ipcRenderer.removeListener('menu-toggle-problems', handler)
+  },
+  onMenuToggleTimer: (callback: () => void) => {
+    const handler = () => callback()
+    ipcRenderer.on('menu-toggle-timer', handler)
+    return () => ipcRenderer.removeListener('menu-toggle-timer', handler)
+  },
+  onMenuPauseTimer: (callback: () => void) => {
+    const handler = () => callback()
+    ipcRenderer.on('menu-pause-timer', handler)
+    return () => ipcRenderer.removeListener('menu-pause-timer', handler)
   }
 })

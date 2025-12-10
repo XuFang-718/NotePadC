@@ -179,6 +179,17 @@ function createMenu() {
           label: 'Stop',
           accelerator: 'CmdOrCtrl+.',
           click: () => mainWindow?.webContents.send('menu-stop')
+        },
+        { type: 'separator' },
+        {
+          label: 'Toggle Timer',
+          accelerator: 'CmdOrCtrl+T',
+          click: () => mainWindow?.webContents.send('menu-toggle-timer')
+        },
+        {
+          label: 'Pause Timer',
+          accelerator: 'CmdOrCtrl+E',
+          click: () => mainWindow?.webContents.send('menu-pause-timer')
         }
       ]
     },

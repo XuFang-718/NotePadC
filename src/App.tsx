@@ -222,6 +222,23 @@ function App() {
     const unsubToggleProblems = window.electronAPI.onMenuToggleProblems((show) => {
       setIsSidebarCollapsed(!show)
     })
+    
+    const unsubToggleTimer = window.electronAPI.onMenuToggleTimer(() => {
+      if (statusBarRef.current) {
+        statusBarRef.current.toggleTimer()
+      }
+    })
+    
+    const unsubPauseTimer = window.electronAPI.onMenuPauseTimer(() => {
+      if (statusBarRef.current) {
+        // 运行中 -> 暂停，暂停中 -> 继续
+        if (statusBarRef.current.isRunning()) {
+          statusBarRef.current.pauseTimer()
+        } else if (statusBarRef.current.isPaused()) {
+          statusBarRef.current.startTimer()
+        }
+      }
+    })
 
     return () => {
       unsubExit()
@@ -232,6 +249,8 @@ function App() {
       unsubStop()
       unsubAutoSave()
       unsubToggleProblems()
+      unsubToggleTimer()
+      unsubPauseTimer()
     }
   }, [setRunning, handleNewFile, handleOpenFile, handleSaveFile, handleRun, handleStop])
 
@@ -272,20 +291,7 @@ function App() {
             e.preventDefault()
             setIsTerminalCollapsed(prev => !prev)
             break
-          case 't':
-            e.preventDefault()
-            if (statusBarRef.current) {
-              statusBarRef.current.toggleTimer()
-            }
-            break
-          case 'e':
-            if (e.shiftKey) {
-              e.preventDefault()
-              if (statusBarRef.current) {
-                statusBarRef.current.stopTimer()
-              }
-            }
-            break
+
         }
       }
     }
