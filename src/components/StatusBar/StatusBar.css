@@ -70,8 +70,28 @@
   gap: 6px;
 }
 
+/* Editing 状态 - 蓝色字体 */
+.status-state.editing {
+  color: #60a5fa;
+}
+
+/* Saved 状态 - 绿色字体 */
+.status-state.saved {
+  color: #4ade80;
+}
+
+/* Compiling 状态 - 黄色字体 */
+.status-state.compiling {
+  color: #fbbf24;
+}
+
 .status-state.compiling .status-icon {
   animation: spin 1s linear infinite;
+}
+
+/* Running 状态 - 绿色字体 */
+.status-state.running {
+  color: #4ade80;
 }
 
 @keyframes spin {
@@ -86,7 +106,10 @@
 
 /* ==================== LANGUAGE ==================== */
 .language {
-  font-weight: 500;
+  font-weight: 600;
+  background: rgba(6, 182, 212, 0.2);
+  border-radius: 4px;
+  color: #22d3ee;
 }
 
 /* ==================== TIMER ==================== */
@@ -97,8 +120,9 @@
   height: 100%;
   padding: 0 8px;
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: all var(--transition-fast);
   font-variant-numeric: tabular-nums;
+  border-radius: 4px;
 }
 
 .timer:hover {
@@ -120,8 +144,20 @@
   text-align: center;
 }
 
+/* Timer running 状态 - 绿色背景 */
+.timer.running {
+  background: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+}
+
 .timer.running .timer-icon {
   color: #4ade80;
+}
+
+/* Timer paused 状态 - 黄色背景 */
+.timer.paused {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
 }
 
 .timer.paused .timer-icon {
